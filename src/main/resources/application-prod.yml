@@ -20,13 +20,6 @@ spring:
     password: ${RABBITMQ_PASSWORD}
     virtual-host: ${RABBITMQ_VIRTUAL_HOST:/}
 
-server:
-  servlet:
-    session:
-      cookie:
-        secure: ${SESSION_COOKIE_SECURE:true}
-        same-site: ${SESSION_COOKIE_SAME_SITE:none}
-
 springdoc:
   api-docs:
     enabled: false

@@ -1,0 +1,908 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Blue OJ 后端接口",
+    "version": "1.0.0",
+    "description": "Blue OJ 单体架构阶段接口契约。统一响应使用 code、data、message；Long 类型 ID 按字符串传输。"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8121/api",
+      "description": "本地开发环境"
+    }
+  ],
+  "tags": [
+    { "name": "用户认证" },
+    { "name": "用户管理" },
+    { "name": "题目公开接口" },
+    { "name": "题目管理" },
+    { "name": "题目提交" }
+  ],
+  "paths": {
+    "/user/register": {
+      "post": {
+        "tags": ["用户认证"],
+        "summary": "用户注册",
+        "operationId": "userRegister",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UserRegisterRequest" },
+              "example": {
+                "userAccount": "blue",
+                "userPassword": "password123",
+                "checkPassword": "password123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "注册成功后返回用户信息",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/UserResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/user/login": {
+      "post": {
+        "tags": ["用户认证"],
+        "summary": "用户登录",
+        "operationId": "userLogin",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UserLoginRequest" },
+              "example": { "userAccount": "blue", "userPassword": "password123" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "登录成功后返回 RS256 JWT 和用户信息",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/UserLoginResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/user/logout": {
+      "post": {
+        "tags": ["用户认证"],
+        "summary": "退出登录",
+        "operationId": "userLogout",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "退出结果",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/BooleanResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/user/get/login": {
+      "get": {
+        "tags": ["用户认证"],
+        "summary": "获取当前登录用户",
+        "operationId": "getLoginUser",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "当前登录用户",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/UserResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/user/update/my": {
+      "post": {
+        "tags": ["用户认证"],
+        "summary": "修改个人资料",
+        "operationId": "updateMyUser",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/UserUpdateMyRequest" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "修改结果",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/BooleanResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/user/add": {
+      "post": {
+        "tags": ["用户管理"],
+        "summary": "管理员创建用户",
+        "operationId": "addUser",
+        "description": "仅管理员可以调用。",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/UserAddRequest" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "新用户 ID",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/LongResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/user/delete": {
+      "post": {
+        "tags": ["用户管理"],
+        "summary": "管理员删除用户",
+        "operationId": "deleteUser",
+        "description": "仅管理员可以调用，业务实现采用逻辑删除。",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/DeleteRequest" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "删除结果",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/BooleanResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/user/update": {
+      "post": {
+        "tags": ["用户管理"],
+        "summary": "管理员修改用户",
+        "operationId": "updateUser",
+        "description": "仅管理员可以调用。",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/UserUpdateRequest" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "修改结果",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/BooleanResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/user/get": {
+      "get": {
+        "tags": ["用户管理"],
+        "summary": "管理员根据 ID 获取用户",
+        "operationId": "getUserById",
+        "description": "仅管理员可以调用；响应不得包含密码。",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/IdQueryParameter" }],
+        "responses": {
+          "200": {
+            "description": "用户信息",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/UserResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/user/list/page": {
+      "post": {
+        "tags": ["用户管理"],
+        "summary": "管理员分页查询用户",
+        "operationId": "listUserByPage",
+        "description": "仅管理员可以调用。",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/UserQueryRequest" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "用户分页",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/UserPageResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/question/add": {
+      "post": {
+        "tags": ["题目管理"],
+        "summary": "创建题目",
+        "operationId": "addQuestion",
+        "description": "登录用户可以创建题目，创建者为当前登录用户。",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/QuestionAddRequest" },
+              "example": {
+                "title": "两数之和",
+                "content": "给定两个整数，输出它们的和。",
+                "tags": ["数组", "入门"],
+                "answer": "使用加法运算得到结果。",
+                "judgeCase": [
+                  { "input": "1 2", "output": "3" },
+                  { "input": "10 20", "output": "30" }
+                ],
+                "judgeConfig": { "timeLimit": 1000, "memoryLimit": 256, "stackLimit": 128 }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "新题目 ID",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/LongResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/question/delete": {
+      "post": {
+        "tags": ["题目管理"],
+        "summary": "删除题目",
+        "operationId": "deleteQuestion",
+        "description": "仅题目创建者或管理员可以删除。",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/DeleteRequest" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "删除结果",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/BooleanResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/question/update": {
+      "post": {
+        "tags": ["题目管理"],
+        "summary": "管理员更新题目",
+        "operationId": "updateQuestion",
+        "description": "仅管理员可以调用。",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/QuestionUpdateRequest" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "更新结果",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/BooleanResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/question/edit": {
+      "post": {
+        "tags": ["题目管理"],
+        "summary": "编辑题目",
+        "operationId": "editQuestion",
+        "description": "仅题目创建者或管理员可以编辑。",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/QuestionUpdateRequest" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "编辑结果",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/BooleanResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/question/get": {
+      "get": {
+        "tags": ["题目管理"],
+        "summary": "获取题目完整信息",
+        "operationId": "getQuestionById",
+        "description": "返回答案和隐藏判题用例，仅创建者或管理员可访问，用于编辑回显。",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/IdQueryParameter" }],
+        "responses": {
+          "200": {
+            "description": "题目完整信息",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/QuestionAdminResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/question/get/vo": {
+      "get": {
+        "tags": ["题目公开接口"],
+        "summary": "获取公开题目详情",
+        "operationId": "getQuestionVOById",
+        "description": "不返回参考答案和隐藏判题用例。",
+        "security": [],
+        "parameters": [{ "$ref": "#/components/parameters/IdQueryParameter" }],
+        "responses": {
+          "200": {
+            "description": "公开题目详情",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/QuestionResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/question/list/page/vo": {
+      "post": {
+        "tags": ["题目公开接口"],
+        "summary": "分页查询公开题目",
+        "operationId": "listQuestionVOByPage",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/QuestionQueryRequest" },
+              "example": {
+                "current": 1,
+                "pageSize": 10,
+                "title": "两数",
+                "tags": ["数组"],
+                "sortField": "createTime",
+                "sortOrder": "descend"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "公开题目分页",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/QuestionPageResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/question/my/list/page/vo": {
+      "post": {
+        "tags": ["题目管理"],
+        "summary": "分页查询我创建的题目",
+        "operationId": "listMyQuestionVOByPage",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/QuestionQueryRequest" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "当前用户创建的题目分页",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/QuestionPageResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/question/list/page": {
+      "post": {
+        "tags": ["题目管理"],
+        "summary": "管理员分页查询完整题目",
+        "operationId": "listQuestionByPage",
+        "description": "仅管理员可以调用，可返回答案和隐藏判题用例。",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/QuestionQueryRequest" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "完整题目分页",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/QuestionAdminPageResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/question/question_submit/do": {
+      "post": {
+        "tags": ["题目提交"],
+        "summary": "提交题目代码",
+        "operationId": "doQuestionSubmit",
+        "description": "创建提交记录并返回提交 ID。后续微服务化时内部改为 MQ，但外部契约保持不变。",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/QuestionSubmitAddRequest" },
+              "example": {
+                "language": "java",
+                "code": "public class Main { public static void main(String[] args) { System.out.println(3); } }",
+                "questionId": "1"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "题目提交记录 ID",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/LongResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/question/question_submit/list/page": {
+      "post": {
+        "tags": ["题目提交"],
+        "summary": "分页查询题目提交记录",
+        "operationId": "listQuestionSubmitByPage",
+        "description": "必须登录。普通用户只能查看允许公开的信息；本人和管理员可以查看提交代码。",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/QuestionSubmitQueryRequest" },
+              "example": {
+                "current": 1,
+                "pageSize": 10,
+                "questionId": "1",
+                "status": 2,
+                "language": "java",
+                "sortField": "createTime",
+                "sortOrder": "descend"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "题目提交记录分页",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/QuestionSubmitPageResponse" } }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "登录后在 Authorization 请求头中发送：Bearer <accessToken>"
+      }
+    },
+    "parameters": {
+      "IdQueryParameter": {
+        "name": "id",
+        "in": "query",
+        "required": true,
+        "description": "业务数据 ID",
+        "schema": { "$ref": "#/components/schemas/LongId" },
+        "example": "1"
+      }
+    },
+    "schemas": {
+      "LongId": {
+        "type": "string",
+        "pattern": "^[1-9]\\d*$",
+        "description": "64 位整数 ID。为避免 JavaScript 精度丢失，请求和响应统一按字符串传输。",
+        "example": "1"
+      },
+      "PageRequest": {
+        "type": "object",
+        "required": ["current", "pageSize"],
+        "properties": {
+          "current": { "type": "integer", "format": "int64", "minimum": 1, "default": 1, "description": "当前页码，从 1 开始" },
+          "pageSize": { "type": "integer", "format": "int64", "minimum": 1, "maximum": 100, "default": 10, "description": "每页条数" },
+          "sortField": { "type": "string", "maxLength": 64, "nullable": true, "description": "排序字段，后端必须按业务使用白名单校验" },
+          "sortOrder": { "type": "string", "nullable": true, "enum": ["ascend", "descend"], "description": "排序方向" }
+        }
+      },
+      "DeleteRequest": {
+        "type": "object",
+        "required": ["id"],
+        "properties": { "id": { "$ref": "#/components/schemas/LongId" } }
+      },
+      "UserRole": {
+        "type": "string",
+        "enum": ["user", "admin", "ban"],
+        "default": "user",
+        "description": "user 普通用户，admin 管理员，ban 封禁用户"
+      },
+      "UserRegisterRequest": {
+        "type": "object",
+        "required": ["userAccount", "userPassword", "checkPassword"],
+        "properties": {
+          "userAccount": { "type": "string", "minLength": 4, "maxLength": 32, "pattern": "^[A-Za-z0-9_]+$" },
+          "userPassword": { "type": "string", "format": "password", "minLength": 8, "maxLength": 64 },
+          "checkPassword": { "type": "string", "format": "password", "minLength": 8, "maxLength": 64, "description": "必须与 userPassword 相同" }
+        }
+      },
+      "UserLoginRequest": {
+        "type": "object",
+        "required": ["userAccount", "userPassword"],
+        "properties": {
+          "userAccount": { "type": "string", "minLength": 4, "maxLength": 32 },
+          "userPassword": { "type": "string", "format": "password", "minLength": 8, "maxLength": 64 }
+        }
+      },
+      "UserUpdateMyRequest": {
+        "type": "object",
+        "properties": {
+          "userName": { "type": "string", "minLength": 1, "maxLength": 64 },
+          "userAvatar": { "type": "string", "maxLength": 1024, "nullable": true, "description": "头像 URL" },
+          "userProfile": { "type": "string", "maxLength": 512, "nullable": true }
+        }
+      },
+      "UserAddRequest": {
+        "type": "object",
+        "required": ["userAccount"],
+        "properties": {
+          "userName": { "type": "string", "minLength": 1, "maxLength": 64 },
+          "userAccount": { "type": "string", "minLength": 4, "maxLength": 32, "pattern": "^[A-Za-z0-9_]+$" },
+          "userAvatar": { "type": "string", "maxLength": 1024, "nullable": true },
+          "userRole": { "$ref": "#/components/schemas/UserRole" }
+        }
+      },
+      "UserUpdateRequest": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "$ref": "#/components/schemas/LongId" },
+          "userName": { "type": "string", "minLength": 1, "maxLength": 64 },
+          "userAvatar": { "type": "string", "maxLength": 1024, "nullable": true },
+          "userProfile": { "type": "string", "maxLength": 512, "nullable": true },
+          "userRole": { "$ref": "#/components/schemas/UserRole" }
+        }
+      },
+      "UserQueryRequest": {
+        "allOf": [
+          { "$ref": "#/components/schemas/PageRequest" },
+          {
+            "type": "object",
+            "properties": {
+              "id": { "$ref": "#/components/schemas/LongId" },
+              "userAccount": { "type": "string", "nullable": true },
+              "userName": { "type": "string", "nullable": true },
+              "userProfile": { "type": "string", "nullable": true },
+              "userRole": { "$ref": "#/components/schemas/UserRole" }
+            }
+          }
+        ]
+      },
+      "UserVO": {
+        "type": "object",
+        "required": ["id", "userName", "userRole"],
+        "properties": {
+          "id": { "$ref": "#/components/schemas/LongId" },
+          "userAccount": { "type": "string", "description": "仅管理员接口返回" },
+          "userName": { "type": "string" },
+          "userAvatar": { "type": "string", "nullable": true },
+          "userProfile": { "type": "string", "nullable": true },
+          "userRole": { "type": "integer", "enum": [0, 1, 2], "description": "0 管理员，1 普通用户，2 封禁用户" },
+          "createTime": { "type": "string", "format": "date-time" },
+          "updateTime": { "type": "string", "format": "date-time" }
+        }
+      },
+      "JudgeCase": {
+        "type": "object",
+        "required": ["input", "output"],
+        "properties": {
+          "input": { "type": "string", "description": "测试输入" },
+          "output": { "type": "string", "description": "预期输出" }
+        }
+      },
+      "JudgeConfig": {
+        "type": "object",
+        "required": ["timeLimit", "memoryLimit"],
+        "properties": {
+          "timeLimit": { "type": "integer", "format": "int64", "minimum": 1, "maximum": 60000, "description": "时间限制，单位毫秒", "example": 1000 },
+          "memoryLimit": { "type": "integer", "format": "int64", "minimum": 1, "description": "内存限制，单位 MB", "example": 256 },
+          "stackLimit": { "type": "integer", "format": "int64", "minimum": 1, "nullable": true, "description": "栈限制，单位 MB", "example": 128 }
+        }
+      },
+      "QuestionAddRequest": {
+        "type": "object",
+        "required": ["title", "content", "answer", "judgeCase", "judgeConfig"],
+        "properties": {
+          "title": { "type": "string", "minLength": 1, "maxLength": 80 },
+          "content": { "type": "string", "minLength": 1, "maxLength": 20000, "description": "Markdown 格式题目内容" },
+          "tags": { "type": "array", "maxItems": 10, "uniqueItems": true, "items": { "type": "string", "minLength": 1, "maxLength": 32 } },
+          "answer": { "type": "string", "minLength": 1, "maxLength": 20000, "description": "参考答案或题解" },
+          "judgeCase": { "type": "array", "minItems": 1, "maxItems": 100, "items": { "$ref": "#/components/schemas/JudgeCase" } },
+          "judgeConfig": { "$ref": "#/components/schemas/JudgeConfig" }
+        }
+      },
+      "QuestionUpdateRequest": {
+        "allOf": [
+          { "$ref": "#/components/schemas/QuestionAddRequest" },
+          {
+            "type": "object",
+            "required": ["id"],
+            "properties": { "id": { "$ref": "#/components/schemas/LongId" } }
+          }
+        ]
+      },
+      "QuestionQueryRequest": {
+        "allOf": [
+          { "$ref": "#/components/schemas/PageRequest" },
+          {
+            "type": "object",
+            "properties": {
+              "id": { "$ref": "#/components/schemas/LongId" },
+              "title": { "type": "string", "maxLength": 80, "nullable": true },
+              "content": { "type": "string", "maxLength": 200, "nullable": true },
+              "tags": { "type": "array", "maxItems": 10, "items": { "type": "string" } },
+              "userId": { "$ref": "#/components/schemas/LongId" }
+            }
+          }
+        ]
+      },
+      "QuestionVO": {
+        "type": "object",
+        "required": ["id", "title", "content", "tags", "submitNum", "acceptedNum", "userId"],
+        "properties": {
+          "id": { "$ref": "#/components/schemas/LongId" },
+          "title": { "type": "string" },
+          "content": { "type": "string", "description": "Markdown 格式题目内容" },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "submitNum": { "type": "integer", "format": "int32", "minimum": 0 },
+          "acceptedNum": { "type": "integer", "format": "int32", "minimum": 0 },
+          "judgeConfig": { "$ref": "#/components/schemas/JudgeConfig" },
+          "userId": { "$ref": "#/components/schemas/LongId" },
+          "createTime": { "type": "string", "format": "date-time" },
+          "updateTime": { "type": "string", "format": "date-time" },
+          "userVO": { "$ref": "#/components/schemas/UserVO" }
+        }
+      },
+      "QuestionAdminVO": {
+        "allOf": [
+          { "$ref": "#/components/schemas/QuestionVO" },
+          {
+            "type": "object",
+            "required": ["answer", "judgeCase"],
+            "properties": {
+              "answer": { "type": "string" },
+              "judgeCase": { "type": "array", "items": { "$ref": "#/components/schemas/JudgeCase" } }
+            }
+          }
+        ]
+      },
+      "QuestionSubmitAddRequest": {
+        "type": "object",
+        "required": ["language", "code", "questionId"],
+        "properties": {
+          "language": { "type": "string", "enum": ["java", "cpp", "go"], "description": "第一阶段可以优先实现 java" },
+          "code": { "type": "string", "minLength": 1, "maxLength": 100000 },
+          "questionId": { "$ref": "#/components/schemas/LongId" }
+        }
+      },
+      "QuestionSubmitQueryRequest": {
+        "allOf": [
+          { "$ref": "#/components/schemas/PageRequest" },
+          {
+            "type": "object",
+            "properties": {
+              "language": { "type": "string", "enum": ["java", "cpp", "go"], "nullable": true },
+              "status": { "type": "integer", "enum": [0, 1, 2, 3], "nullable": true, "description": "0 等待，1 判题中，2 完成，3 判题失败" },
+              "questionId": { "$ref": "#/components/schemas/LongId" },
+              "userId": { "$ref": "#/components/schemas/LongId" }
+            }
+          }
+        ]
+      },
+      "JudgeInfo": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "nullable": true,
+            "enum": ["Accepted", "Wrong Answer", "Compile Error", "Memory Limit Exceeded", "Time Limit Exceeded", "Output Limit Exceeded", "Runtime Error", "System Error"]
+          },
+          "memory": { "type": "integer", "format": "int64", "nullable": true, "description": "最大内存占用，单位 KB" },
+          "time": { "type": "integer", "format": "int64", "nullable": true, "description": "最大执行时间，单位毫秒" }
+        }
+      },
+      "QuestionSubmitVO": {
+        "type": "object",
+        "required": ["id", "language", "status", "questionId", "userId"],
+        "properties": {
+          "id": { "$ref": "#/components/schemas/LongId" },
+          "language": { "type": "string", "enum": ["java", "cpp", "go"] },
+          "code": { "type": "string", "nullable": true, "description": "仅提交者本人或管理员可以查看" },
+          "judgeInfo": { "$ref": "#/components/schemas/JudgeInfo" },
+          "status": { "type": "integer", "enum": [0, 1, 2, 3], "description": "0 等待，1 判题中，2 完成，3 判题失败" },
+          "questionId": { "$ref": "#/components/schemas/LongId" },
+          "userId": { "$ref": "#/components/schemas/LongId" },
+          "createTime": { "type": "string", "format": "date-time" },
+          "updateTime": { "type": "string", "format": "date-time" },
+          "userVO": { "$ref": "#/components/schemas/UserVO" },
+          "questionVO": { "$ref": "#/components/schemas/QuestionVO" }
+        }
+      },
+      "UserPage": {
+        "type": "object",
+        "required": ["records", "total", "current", "size"],
+        "properties": {
+          "records": { "type": "array", "items": { "$ref": "#/components/schemas/UserVO" } },
+          "total": { "type": "integer", "format": "int64", "minimum": 0 },
+          "current": { "type": "integer", "format": "int64" },
+          "size": { "type": "integer", "format": "int64" },
+          "pages": { "type": "integer", "format": "int64" }
+        }
+      },
+      "QuestionPage": {
+        "type": "object",
+        "required": ["records", "total", "current", "size"],
+        "properties": {
+          "records": { "type": "array", "items": { "$ref": "#/components/schemas/QuestionVO" } },
+          "total": { "type": "integer", "format": "int64", "minimum": 0 },
+          "current": { "type": "integer", "format": "int64" },
+          "size": { "type": "integer", "format": "int64" },
+          "pages": { "type": "integer", "format": "int64" }
+        }
+      },
+      "QuestionAdminPage": {
+        "type": "object",
+        "required": ["records", "total", "current", "size"],
+        "properties": {
+          "records": { "type": "array", "items": { "$ref": "#/components/schemas/QuestionAdminVO" } },
+          "total": { "type": "integer", "format": "int64", "minimum": 0 },
+          "current": { "type": "integer", "format": "int64" },
+          "size": { "type": "integer", "format": "int64" },
+          "pages": { "type": "integer", "format": "int64" }
+        }
+      },
+      "QuestionSubmitPage": {
+        "type": "object",
+        "required": ["records", "total", "current", "size"],
+        "properties": {
+          "records": { "type": "array", "items": { "$ref": "#/components/schemas/QuestionSubmitVO" } },
+          "total": { "type": "integer", "format": "int64", "minimum": 0 },
+          "current": { "type": "integer", "format": "int64" },
+          "size": { "type": "integer", "format": "int64" },
+          "pages": { "type": "integer", "format": "int64" }
+        }
+      },
+      "BaseResponse": {
+        "type": "object",
+        "required": ["code", "message"],
+        "properties": {
+          "code": { "type": "integer", "format": "int32", "description": "业务状态码，0 表示成功" },
+          "data": { "nullable": true },
+          "message": { "type": "string" }
+        }
+      },
+      "LongResponse": {
+        "allOf": [
+          { "$ref": "#/components/schemas/BaseResponse" },
+          { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/LongId" } } }
+        ],
+        "example": { "code": 0, "data": "1", "message": "ok" }
+      },
+      "BooleanResponse": {
+        "allOf": [
+          { "$ref": "#/components/schemas/BaseResponse" },
+          { "type": "object", "properties": { "data": { "type": "boolean" } } }
+        ],
+        "example": { "code": 0, "data": true, "message": "ok" }
+      },
+      "UserLoginVO": {
+        "type": "object",
+        "required": ["accessToken", "tokenType", "expiresAt", "user"],
+        "properties": {
+          "accessToken": { "type": "string", "description": "RS256 JWT 访问令牌" },
+          "tokenType": { "type": "string", "enum": ["Bearer"] },
+          "expiresAt": { "type": "string", "format": "date-time" },
+          "user": { "$ref": "#/components/schemas/UserVO" }
+        }
+      },
+      "UserLoginResponse": {
+        "allOf": [
+          { "$ref": "#/components/schemas/BaseResponse" },
+          { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/UserLoginVO" } } }
+        ]
+      },
+      "UserResponse": {
+        "allOf": [
+          { "$ref": "#/components/schemas/BaseResponse" },
+          { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/UserVO" } } }
+        ]
+      },
+      "UserPageResponse": {
+        "allOf": [
+          { "$ref": "#/components/schemas/BaseResponse" },
+          { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/UserPage" } } }
+        ]
+      },
+      "QuestionResponse": {
+        "allOf": [
+          { "$ref": "#/components/schemas/BaseResponse" },
+          { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/QuestionVO" } } }
+        ]
+      },
+      "QuestionAdminResponse": {
+        "allOf": [
+          { "$ref": "#/components/schemas/BaseResponse" },
+          { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/QuestionAdminVO" } } }
+        ]
+      },
+      "QuestionPageResponse": {
+        "allOf": [
+          { "$ref": "#/components/schemas/BaseResponse" },
+          { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/QuestionPage" } } }
+        ]
+      },
+      "QuestionAdminPageResponse": {
+        "allOf": [
+          { "$ref": "#/components/schemas/BaseResponse" },
+          { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/QuestionAdminPage" } } }
+        ]
+      },
+      "QuestionSubmitPageResponse": {
+        "allOf": [
+          { "$ref": "#/components/schemas/BaseResponse" },
+          { "type": "object", "properties": { "data": { "$ref": "#/components/schemas/QuestionSubmitPage" } } }
+        ]
+      }
+    }
+  }
+}

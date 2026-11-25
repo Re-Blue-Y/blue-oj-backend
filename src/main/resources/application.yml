@@ -10,11 +10,6 @@ spring:
       max-file-size: 10MB
       max-request-size: 20MB
 
-  session:
-    data:
-      redis:
-        namespace: blue-oj:session
-
   task:
     execution:
       thread-name-prefix: blue-oj-async-
@@ -29,15 +24,6 @@ server:
   port: 8121
   servlet:
     context-path: /api
-
-    session:
-      timeout: 30d
-      cookie:
-        name: BLUEOJ_SESSION
-        http-only: true
-        secure: false
-        same-site: lax
-        path: /
 
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml
@@ -65,6 +51,13 @@ springdoc:
   packages-to-scan: com.blue.blueojbackend.controller
 
 app:
+  jwt:
+    issuer: blue-oj
+    audience: blue-oj-api
+    access-token-ttl: 30m
+    clock-skew: 30s
+    private-key: ${JWT_PRIVATE_KEY:}
+    public-key: ${JWT_PUBLIC_KEY:}
   cors:
     allowed-origins:
       - http://localhost:8080

@@ -18,6 +18,8 @@ public enum ErrorCode {
 
     SYSTEM_ERROR(50000, "系统内部异常"),
     OPERATION_ERROR(50001, "操作失败"),
+    USER_ACCOUNT_EXISTS(40000, "登录账号已经存在"),
+    USER_LOGIN_ERROR(40001, "账号或密码错误"),
     API_REQUEST_ERROR(50010, "接口调用失败");
 
     /**
@@ -42,4 +44,5 @@ public enum ErrorCode {
     public String getMessage() {
         return message;
     }
+
 }
